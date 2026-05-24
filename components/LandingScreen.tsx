@@ -119,6 +119,16 @@ export default function LandingScreen({ user }: Props) {
               VS AI 🤖
             </motion.button>
 
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => router.push('/word-drop')}
+              className="w-full rounded-xl sm:rounded-2xl py-4 font-black text-base sm:text-lg text-white transition-all border border-[#ffaa00]/30 hover:border-[#ffaa00]/60"
+              style={{ background: 'linear-gradient(135deg, #1a1200 0%, #0d0a00 100%)' }}
+            >
+              WORD DROP ☄️
+            </motion.button>
+
             <div className="flex items-center gap-3 py-0.5">
               <div className="flex-1 h-px bg-white/5" />
               <span className="text-white/20 text-xs">or play with friends</span>
