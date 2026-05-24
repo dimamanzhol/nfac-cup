@@ -84,6 +84,19 @@ export default function LandingScreen({ user }: Props) {
         {/* Actions */}
         <div className="space-y-3">
           <button
+            onClick={() => router.push('/solo')}
+            className="w-full bg-[#ff4444] text-white font-black py-4 rounded-lg text-lg hover:bg-[#cc3333] transition-colors"
+          >
+            VS AI 🤖
+          </button>
+
+          <div className="flex items-center gap-3 my-1">
+            <div className="flex-1 h-px bg-[#1a1a1a]" />
+            <span className="text-[#333] text-xs">or multiplayer</span>
+            <div className="flex-1 h-px bg-[#1a1a1a]" />
+          </div>
+
+          <button
             onClick={createRoom}
             disabled={creating}
             className="w-full bg-white text-black font-bold py-4 rounded-lg text-lg hover:bg-[#eee] transition-colors disabled:opacity-50"
