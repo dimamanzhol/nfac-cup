@@ -23,23 +23,11 @@ export default function LandingScreen({ user }: Props) {
     setError('')
     const { data: { user: authUser } } = await supabase.auth.getUser()
     if (!authUser) { router.push('/auth'); return }
-
     const code = generateRoomCode()
-    const { error } = await supabase.from('rooms').insert({
-      code,
-      host_id: authUser.id,
-      status: 'lobby',
-    })
+    const { error } = await supabase.from('rooms').insert({ code, host_id: authUser.id, status: 'lobby' })
     if (error) { setError(error.message); setCreating(false); return }
-
-    // Join as host player
-    await supabase.from('players').insert({
-      room_id: (await supabase.from('rooms').select('id').eq('code', code).single()).data?.id,
-      user_id: authUser.id,
-      name: user?.username ?? 'Anonymous',
-      is_host: true,
-    })
-
+    const { data: room } = await supabase.from('rooms').select('id').eq('code', code).single()
+    await supabase.from('players').insert({ room_id: room?.id, user_id: authUser.id, name: user?.username ?? 'Anonymous', is_host: true })
     router.push(`/room/${code}`)
   }
 
@@ -57,91 +45,121 @@ export default function LandingScreen({ user }: Props) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#0a0a0a] px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center w-full max-w-md"
-      >
-        {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-7xl font-black tracking-tighter text-white mb-2">TypeWar</h1>
-          <p className="text-[#555] text-base">Multiplayer battle royale typing game</p>
-          <p className="text-[#333] text-xs mt-1">Type or die. Last founder standing wins the 🦄</p>
-        </div>
+    <div className="min-h-screen bg-[#0a0a0a] bg-grid flex flex-col relative overflow-hidden">
+      {/* Ambient glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] sm:w-[600px] h-[200px] sm:h-[300px] blur-[100px] sm:blur-[120px] opacity-10 pointer-events-none"
+        style={{ background: 'radial-gradient(ellipse, #ff4444 0%, transparent 70%)' }} />
 
-        {/* User stats */}
+      {/* Top nav */}
+      <div className="flex items-center justify-between px-4 sm:px-8 py-4 sm:py-5 border-b border-white/5 relative z-10">
+        <span className="font-black text-white text-lg tracking-tighter">TypeWar</span>
+
         {user && (
-          <div className="flex items-center justify-center gap-6 mb-10 text-sm">
-            <span className="text-white font-semibold">@{user.username}</span>
-            <span className="text-[#555]">|</span>
-            <span className="text-[#666]">Best: <span className="text-white">{user.best_wpm} WPM</span></span>
-            <span className="text-[#555]">|</span>
-            <span className="text-[#666]">Wins: <span className="text-[#ffaa00]">{user.total_wins} 🦄</span></span>
-          </div>
-        )}
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Stats — hidden on very small screens */}
+            <div className="hidden sm:flex items-center gap-3 text-sm">
+              <span className="text-white/50">@{user.username}</span>
+              <span className="text-white/20">·</span>
+              <span className="text-white/40">{user.best_wpm} <span className="text-white/60">WPM</span></span>
+              <span className="text-white/20">·</span>
+              <span className="text-[#ffaa00]">{user.total_wins} 🦄</span>
+            </div>
+            {/* Username only on mobile */}
+            <span className="sm:hidden text-white/40 text-sm">@{user.username}</span>
 
-        {/* Actions */}
-        <div className="space-y-3">
-          <button
-            onClick={() => router.push('/solo')}
-            className="w-full bg-[#ff4444] text-white font-black py-4 rounded-lg text-lg hover:bg-[#cc3333] transition-colors"
-          >
-            VS AI 🤖
-          </button>
-
-          <div className="flex items-center gap-3 my-1">
-            <div className="flex-1 h-px bg-[#1a1a1a]" />
-            <span className="text-[#333] text-xs">or multiplayer</span>
-            <div className="flex-1 h-px bg-[#1a1a1a]" />
-          </div>
-
-          <button
-            onClick={createRoom}
-            disabled={creating}
-            className="w-full bg-white text-black font-bold py-4 rounded-lg text-lg hover:bg-[#eee] transition-colors disabled:opacity-50"
-          >
-            {creating ? 'CREATING...' : 'CREATE ROOM'}
-          </button>
-
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="ROOM CODE"
-              value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-              maxLength={4}
-              onKeyDown={(e) => e.key === 'Enter' && joinRoom()}
-              className="flex-1 bg-[#111] border border-[#333] rounded-lg px-4 py-4 text-white placeholder-[#444] font-mono text-center text-lg tracking-widest focus:outline-none focus:border-[#555] uppercase"
-            />
-            <button
-              onClick={joinRoom}
-              disabled={joining}
-              className="bg-[#111] border border-[#333] text-white font-bold px-6 py-4 rounded-lg hover:border-[#555] transition-colors disabled:opacity-50"
-            >
-              {joining ? '...' : 'JOIN'}
+            <button onClick={() => router.push('/leaderboard')}
+              className="text-xs text-white/30 border border-white/10 px-2.5 sm:px-3 py-1.5 rounded-lg hover:border-white/20 hover:text-white/60 transition-all">
+              Board
+            </button>
+            <button onClick={signOut} className="text-xs text-white/20 hover:text-white/40 transition-colors hidden sm:block">
+              Sign out
             </button>
           </div>
-
-          <button
-            onClick={() => router.push('/leaderboard')}
-            className="w-full border border-[#222] text-[#666] font-semibold py-3 rounded-lg hover:border-[#333] hover:text-white transition-colors text-sm"
-          >
-            LEADERBOARD
-          </button>
-        </div>
-
-        {error && (
-          <p className="text-[#ff4444] text-sm mt-4">{error}</p>
         )}
+      </div>
 
-        <button
-          onClick={signOut}
-          className="mt-8 text-[#333] text-xs hover:text-[#666] transition-colors"
+      {/* Hero */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-8 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center w-full max-w-sm sm:max-w-lg"
         >
-          sign out
-        </button>
-      </motion.div>
+          {/* Title */}
+          <motion.h1
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1, duration: 0.4 }}
+            className="text-7xl sm:text-8xl font-black tracking-tighter text-white mb-2 sm:mb-3 text-glow-red leading-none"
+          >
+            TypeWar
+          </motion.h1>
+          <p className="text-white/40 text-sm sm:text-base mb-1 sm:mb-2">Multiplayer battle royale typing game</p>
+          <p className="text-white/20 text-xs sm:text-sm mb-8 sm:mb-12">Type or die — last founder standing wins the 🦄</p>
+
+          {/* User stats on mobile (below title) */}
+          {user && (
+            <div className="sm:hidden flex items-center justify-center gap-3 text-xs mb-6 text-white/40">
+              <span>{user.best_wpm} WPM</span>
+              <span className="text-white/15">·</span>
+              <span className="text-[#ffaa00]">{user.total_wins} unicorns</span>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="space-y-2.5 sm:space-y-3">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => router.push('/solo')}
+              className="w-full relative overflow-hidden rounded-xl sm:rounded-2xl py-4 font-black text-base sm:text-lg text-white transition-all glow-red"
+              style={{ background: 'linear-gradient(135deg, #ff4444 0%, #cc2222 100%)' }}
+            >
+              VS AI 🤖
+            </motion.button>
+
+            <div className="flex items-center gap-3 py-0.5">
+              <div className="flex-1 h-px bg-white/5" />
+              <span className="text-white/20 text-xs">or play with friends</span>
+              <div className="flex-1 h-px bg-white/5" />
+            </div>
+
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={createRoom}
+              disabled={creating}
+              className="w-full bg-white/10 hover:bg-white/15 border border-white/10 hover:border-white/20 text-white font-bold py-3.5 sm:py-4 rounded-xl sm:rounded-2xl transition-all disabled:opacity-40 text-sm tracking-wide"
+            >
+              {creating ? 'CREATING...' : 'CREATE ROOM'}
+            </motion.button>
+
+            <div className="flex gap-2">
+              <input
+                type="text" placeholder="CODE" value={joinCode}
+                onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                maxLength={4}
+                onKeyDown={(e) => e.key === 'Enter' && joinRoom()}
+                className="flex-1 bg-white/5 border border-white/10 focus:border-white/30 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-3.5 sm:py-4 text-white placeholder-white/20 font-mono text-center text-base sm:text-lg tracking-[0.3em] focus:outline-none transition-all uppercase min-w-0"
+              />
+              <button onClick={joinRoom} disabled={joining}
+                className="bg-white/10 hover:bg-white/15 border border-white/10 text-white font-bold px-4 sm:px-6 rounded-xl sm:rounded-2xl transition-all disabled:opacity-40 text-sm shrink-0">
+                {joining ? '...' : 'JOIN'}
+              </button>
+            </div>
+          </div>
+
+          {error && <p className="text-[#ff4444] text-sm mt-3">{error}</p>}
+
+          <button onClick={signOut} className="sm:hidden mt-6 text-white/20 text-xs hover:text-white/40 transition-colors">
+            sign out
+          </button>
+        </motion.div>
+      </div>
+
+      <div className="text-center pb-4 sm:pb-6 relative z-10">
+        <p className="text-white/10 text-xs">Built at nFactorial Incubator · 2026</p>
+      </div>
     </div>
   )
 }

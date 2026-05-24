@@ -26,18 +26,18 @@ export default function EliminationOverlay({ eliminatedName, eliminatedCharacter
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 1.1, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className="text-center px-8"
+            className="text-center px-6 sm:px-8"
           >
-            <p className="text-[#ff4444] text-5xl font-black tracking-tighter mb-4">BURNT OUT!</p>
+            <p className="text-[#ff4444] text-4xl sm:text-5xl font-black tracking-tighter mb-3 sm:mb-4">BURNT OUT!</p>
             {char && (
-              <p className="text-white text-2xl font-bold mb-2">
+              <p className="text-white text-xl sm:text-2xl font-bold mb-2">
                 {char.emoji} {char.name}
               </p>
             )}
-            <p className="text-[#888] text-lg">
+            <p className="text-[#888] text-base sm:text-lg">
               @{eliminatedName} ran out of runway and went bankrupt.
             </p>
-            <p className="text-[#444] text-sm mt-4">Series A dreams... crushed.</p>
+            <p className="text-[#444] text-sm mt-3 sm:mt-4">Series A dreams... crushed.</p>
           </motion.div>
         </motion.div>
       )}

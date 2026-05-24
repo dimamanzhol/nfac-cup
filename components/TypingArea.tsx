@@ -56,14 +56,14 @@ export default function TypingArea({ text, typedCount, onType, disabled }: Props
     <div className="w-full">
       {/* Text display */}
       <div
-        className="font-mono text-lg leading-relaxed mb-6 p-6 bg-[#111] rounded-lg border border-[#1a1a1a] select-none cursor-text"
+        className="font-mono text-base sm:text-lg leading-relaxed mb-4 sm:mb-6 p-4 sm:p-6 bg-white/3 rounded-xl border border-white/8 select-none cursor-text"
         onClick={() => inputRef.current?.focus()}
       >
         <span className="text-[#00ff88]">{correctText}</span>
         {currentChar && (
           <span className="bg-white text-black rounded px-0.5">{currentChar}</span>
         )}
-        <span className="text-[#555]">{remainingText}</span>
+        <span className="text-white/25">{remainingText}</span>
       </div>
 
       {/* Hidden input to capture keypresses */}

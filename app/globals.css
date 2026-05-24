@@ -12,8 +12,34 @@
   --font-mono: var(--font-geist-mono);
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   background: #0a0a0a;
   color: #ffffff;
   font-family: var(--font-geist-sans), Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle grid background pattern */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Red glow utility */
+.glow-red {
+  box-shadow: 0 0 40px rgba(255, 68, 68, 0.15), 0 0 80px rgba(255, 68, 68, 0.05);
+}
+
+.text-glow-red {
+  text-shadow: 0 0 40px rgba(255, 68, 68, 0.5);
+}
+
+.text-glow-gold {
+  text-shadow: 0 0 40px rgba(255, 170, 0, 0.6);
 }

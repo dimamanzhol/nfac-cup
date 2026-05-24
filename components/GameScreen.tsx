@@ -183,16 +183,16 @@ export default function GameScreen({ room, players, userId, channel, onGameOver,
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
       {/* Top leaderboard bar */}
-      <div className="border-b border-[#1a1a1a] px-4 py-3">
+      <div className="border-b border-[#1a1a1a] px-3 sm:px-4 py-2 sm:py-3">
         <div className="max-w-3xl mx-auto">
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2">
             {players.map((p) => {
               const char = getCharacter(p.character_id)
               const stage = getValuationStage(p.progress)
               return (
                 <div
                   key={p.user_id}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border text-xs font-semibold transition-all ${
                     p.eliminated
                       ? 'border-[#1a1a1a] text-[#333] bg-transparent'
                       : p.user_id === userId
@@ -201,12 +201,12 @@ export default function GameScreen({ room, players, userId, channel, onGameOver,
                   }`}
                 >
                   <span>{char?.emoji ?? '👤'}</span>
-                  <span className="max-w-[80px] truncate">{p.name}</span>
+                  <span className="max-w-[60px] sm:max-w-[80px] truncate">{p.name}</span>
                   {p.eliminated ? (
                     <span className="text-[#ff4444]">💀</span>
                   ) : (
                     <>
-                      <div className="w-12 h-1 bg-[#222] rounded-full overflow-hidden">
+                      <div className="w-8 sm:w-12 h-1 bg-[#222] rounded-full overflow-hidden">
                         <div
                           className="h-full rounded-full transition-all"
                           style={{ width: `${p.progress}%`, backgroundColor: stage.color }}
@@ -223,25 +223,25 @@ export default function GameScreen({ room, players, userId, channel, onGameOver,
       </div>
 
       {/* Main game area */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
+      <div className="flex-1 flex flex-col items-center justify-center px-3 sm:px-6 py-4 sm:py-8 pb-24 sm:pb-8">
         <div className="w-full max-w-3xl">
           {/* Valuation tracker */}
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-3 sm:mb-6 flex items-center justify-between">
             <div>
-              <p className="text-xs text-[#555] uppercase tracking-widest mb-1">Your Valuation</p>
-              <p className="font-bold text-lg" style={{ color: myStage.color }}>
+              <p className="text-[10px] sm:text-xs text-white/30 uppercase tracking-widest mb-0.5 sm:mb-1">Valuation</p>
+              <p className="font-bold text-sm sm:text-lg" style={{ color: myStage.color }}>
                 {myStage.label}
               </p>
-              <p className="text-[#555] text-xs">{myStage.valuation}</p>
+              <p className="text-white/30 text-[10px] sm:text-xs hidden sm:block">{myStage.valuation}</p>
             </div>
             <div className="text-right">
-              <p className="text-[#555] text-xs mb-1">WPM</p>
-              <p className="text-3xl font-black text-white font-mono">{wpm}</p>
+              <p className="text-white/30 text-[10px] sm:text-xs mb-0.5 sm:mb-1">WPM</p>
+              <p className="text-2xl sm:text-3xl font-black text-white font-mono">{wpm}</p>
             </div>
           </div>
 
           {/* Progress bar */}
-          <div className="w-full h-2 bg-[#111] rounded-full mb-6 overflow-hidden">
+          <div className="w-full h-1.5 sm:h-2 bg-white/5 rounded-full mb-4 sm:mb-6 overflow-hidden">
             <motion.div
               className="h-full rounded-full"
               style={{ backgroundColor: myStage.color }}
@@ -265,13 +265,13 @@ export default function GameScreen({ room, players, userId, channel, onGameOver,
       </div>
 
       {/* Countdown timer */}
-      <div className="fixed bottom-6 right-6">
-        <div className={`w-16 h-16 rounded-full border-2 flex items-center justify-center font-black text-xl font-mono ${
-          countdown <= 5 ? 'border-[#ff4444] text-[#ff4444]' : 'border-[#333] text-[#555]'
+      <div className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-40">
+        <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 flex items-center justify-center font-black text-base sm:text-xl font-mono ${
+          countdown <= 5 ? 'border-[#ff4444] text-[#ff4444]' : 'border-white/10 text-white/20'
         }`}>
           {countdown}
         </div>
-        <p className="text-[#333] text-xs text-center mt-1">elim</p>
+        <p className="text-white/15 text-[9px] sm:text-xs text-center mt-1">elim</p>
       </div>
 
       <EliminationOverlay
