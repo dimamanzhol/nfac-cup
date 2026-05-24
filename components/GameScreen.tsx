@@ -6,6 +6,7 @@ import { RealtimeChannel } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase'
 import { calcWPM, calcProgress, getValuationStage } from '@/lib/game'
 import { getCharacter } from '@/data/characters'
+import { playElimination } from '@/lib/sounds'
 import TypingArea from './TypingArea'
 import EliminationOverlay from './EliminationOverlay'
 
@@ -43,6 +44,7 @@ export default function GameScreen({ room, players, userId, channel, onGameOver,
   const [typedCount, setTypedCount] = useState(0)
   const [wpm, setWpm] = useState(0)
   const [countdown, setCountdown] = useState(30)
+  const [shaking, setShaking] = useState(false)
   const [eliminated, setEliminated] = useState(false)
   const [showElimination, setShowElimination] = useState(false)
   const [eliminatedInfo, setEliminatedInfo] = useState<{ name: string; character_id: string | null } | null>(null)
@@ -143,6 +145,9 @@ export default function GameScreen({ room, players, userId, channel, onGameOver,
     const sub = channel.on('broadcast', { event: 'player_eliminated' }, ({ payload }) => {
       setEliminatedInfo({ name: payload.name, character_id: payload.character_id })
       setShowElimination(true)
+      playElimination()
+      setShaking(true)
+      setTimeout(() => setShaking(false), 500)
       setTimeout(() => setShowElimination(false), 3000)
       if (payload.user_id === userId) setEliminated(true)
     })
@@ -180,8 +185,21 @@ export default function GameScreen({ room, players, userId, channel, onGameOver,
   const myProgress = calcProgress(typedCount, text.length)
   const myStage = getValuationStage(myProgress)
 
+  const countdownPct = (countdown / 30) * 100
+  const barColor = countdown <= 5 ? '#ff4444' : countdown <= 10 ? '#ffaa00' : '#00ff88'
+
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
+    <div className={`min-h-screen bg-[#0a0a0a] flex flex-col ${shaking ? 'shake' : ''}`}>
+      {/* Elimination countdown bar */}
+      <div className="h-1 w-full bg-white/5 flex-shrink-0">
+        <motion.div
+          className="h-full"
+          style={{ backgroundColor: barColor }}
+          animate={{ width: `${countdownPct}%` }}
+          transition={{ duration: 0.9, ease: 'linear' }}
+        />
+      </div>
+
       {/* Top leaderboard bar */}
       <div className="border-b border-[#1a1a1a] px-3 sm:px-4 py-2 sm:py-3">
         <div className="max-w-3xl mx-auto">
@@ -264,14 +282,20 @@ export default function GameScreen({ room, players, userId, channel, onGameOver,
         </div>
       </div>
 
-      {/* Countdown timer */}
+      {/* Countdown chip */}
       <div className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-40">
-        <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 flex items-center justify-center font-black text-base sm:text-xl font-mono ${
-          countdown <= 5 ? 'border-[#ff4444] text-[#ff4444]' : 'border-white/10 text-white/20'
-        }`}>
-          {countdown}
-        </div>
-        <p className="text-white/15 text-[9px] sm:text-xs text-center mt-1">elim</p>
+        <motion.div
+          animate={countdown <= 5 ? { scale: [1, 1.15, 1] } : {}}
+          transition={{ duration: 0.4, repeat: countdown <= 5 ? Infinity : 0 }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold font-mono"
+          style={{
+            borderColor: barColor,
+            color: barColor,
+            backgroundColor: `${barColor}12`,
+          }}
+        >
+          💀 {countdown}s
+        </motion.div>
       </div>
 
       <EliminationOverlay

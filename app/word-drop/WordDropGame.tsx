@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
+import { playPop, playError, playGameOver } from '@/lib/sounds'
+import { fireWinConfetti } from '@/lib/confetti'
 
 const WORD_LIST = [
   'startup', 'founder', 'unicorn', 'pivot', 'seed', 'venture', 'traction',
@@ -74,6 +76,7 @@ export default function WordDropGame({ username }: { username: string }) {
       wordsRef.current = alive
       setDisplayWords([...alive])
       if (lost > 0) {
+        playError()
         comboRef.current = 0
         setCombo(0)
         livesRef.current = Math.max(0, livesRef.current - lost)
@@ -81,6 +84,7 @@ export default function WordDropGame({ username }: { username: string }) {
         if (livesRef.current <= 0) {
           phaseRef.current = 'gameover'
           setBestScore(prev => Math.max(prev, scoreRef.current))
+          playGameOver()
           setPhase('gameover')
         }
       }
@@ -109,6 +113,7 @@ export default function WordDropGame({ username }: { username: string }) {
     const match = wordsRef.current.find(w => w.text === val)
     if (!match) return
     wordsRef.current = wordsRef.current.filter(w => w.id !== match.id)
+    playPop()
     comboRef.current += 1
     const pts = 10 + (comboRef.current - 1) * 3
     scoreRef.current += pts

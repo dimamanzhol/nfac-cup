@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation'
 import { getCharacter } from '@/data/characters'
 import { calcWPM, calcProgress, getValuationStage } from '@/lib/game'
 import { createClient } from '@/lib/supabase'
+import { playElimination, playWin, playGameOver } from '@/lib/sounds'
+import { fireWinConfetti } from '@/lib/confetti'
 import TypingArea from './TypingArea'
 import EliminationOverlay from './EliminationOverlay'
 import RaceTrack from './RaceTrack'
@@ -66,6 +68,7 @@ export default function SoloGame({ userId, username, characterId, difficulty, te
   const [playerWpm, setPlayerWpm] = useState(0)
   const [hasError, setHasError] = useState(false)
   const [countdown, setCountdown] = useState(30)
+  const [shaking, setShaking] = useState(false)
   const [showElimination, setShowElimination] = useState(false)
   const [eliminatedInfo, setEliminatedInfo] = useState<{ name: string; character_id: string } | null>(null)
 
@@ -77,12 +80,16 @@ export default function SoloGame({ userId, username, characterId, difficulty, te
   function triggerElimOverlay(racer: Racer) {
     setEliminatedInfo({ name: racer.name, character_id: racer.character_id })
     setShowElimination(true)
+    playElimination()
+    setShaking(true)
+    setTimeout(() => setShaking(false), 500)
     setTimeout(() => setShowElimination(false), 3000)
   }
 
   const endGame = useCallback((winnerRacer: Racer) => {
     if (gameOverRef.current) return
     gameOverRef.current = true
+    if (winnerRacer.isPlayer) { playWin(); fireWinConfetti() } else { playGameOver() }
 
     const ranks = racers.current
       .map((r) => ({ racer: r, progress: progressRef.current[r.id] ?? 0, wpm: wpmRef.current[r.id] ?? 0 }))
@@ -262,8 +269,21 @@ export default function SoloGame({ userId, username, characterId, difficulty, te
     eliminated: r.isPlayer ? playerEliminated : (uiEliminated[r.id] ?? false),
   }))
 
+  const countdownPct = (countdown / 30) * 100
+  const barColor = countdown <= 5 ? '#ff4444' : countdown <= 10 ? '#ffaa00' : '#00ff88'
+
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
+    <div className={`min-h-screen bg-[#0a0a0a] flex flex-col ${shaking ? 'shake' : ''}`}>
+      {/* Elimination countdown bar */}
+      <div className="h-1 w-full bg-white/5 flex-shrink-0">
+        <motion.div
+          className="h-full"
+          style={{ backgroundColor: barColor }}
+          animate={{ width: `${countdownPct}%` }}
+          transition={{ duration: 0.9, ease: 'linear' }}
+        />
+      </div>
+
       {/* Race track */}
       <div className="border-b border-[#1a1a1a]">
         <RaceTrack racers={raceData} />
@@ -298,14 +318,20 @@ export default function SoloGame({ userId, username, characterId, difficulty, te
         </div>
       </div>
 
-      {/* Countdown — smaller on mobile, above safe area */}
+      {/* Countdown chip — bottom right */}
       <div className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-40">
-        <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 flex items-center justify-center font-black text-base sm:text-xl font-mono ${
-          countdown <= 5 ? 'border-[#ff4444] text-[#ff4444]' : 'border-white/10 text-white/20'
-        }`}>
-          {countdown}
-        </div>
-        <p className="text-white/15 text-[9px] sm:text-xs text-center mt-1">elim</p>
+        <motion.div
+          animate={countdown <= 5 ? { scale: [1, 1.15, 1] } : {}}
+          transition={{ duration: 0.4, repeat: countdown <= 5 ? Infinity : 0 }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold font-mono"
+          style={{
+            borderColor: barColor,
+            color: barColor,
+            backgroundColor: `${barColor}12`,
+          }}
+        >
+          💀 {countdown}s
+        </motion.div>
       </div>
 
       <EliminationOverlay visible={showElimination} eliminatedName={eliminatedInfo?.name ?? null} eliminatedCharacterId={eliminatedInfo?.character_id ?? null} />

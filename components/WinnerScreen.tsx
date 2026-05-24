@@ -1,10 +1,13 @@
 'use client'
 
+import { useEffect } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { getCharacter } from '@/data/characters'
 import { getValuationStage } from '@/lib/game'
+import { fireWinConfetti } from '@/lib/confetti'
+import { playWin } from '@/lib/sounds'
 
 interface Player {
   id: string
@@ -27,6 +30,11 @@ interface Props {
 export default function WinnerScreen({ winner, players, roomId, userId }: Props) {
   const router = useRouter()
   const winnerChar = getCharacter(winner.character_id)
+
+  useEffect(() => {
+    playWin()
+    fireWinConfetti()
+  }, [])
 
   // Sort: winner first, then by progress desc
   const ranked = [...players].sort((a, b) => {

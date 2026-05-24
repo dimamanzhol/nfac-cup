@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useCallback } from 'react'
+import { playClick, playError } from '@/lib/sounds'
 
 interface Props {
   text: string
@@ -39,8 +40,10 @@ export default function TypingArea({ text, typedCount, onType, disabled }: Props
       if (e.key === expected) {
         const newCount = typedCount + 1
         inputValueRef.current += e.key
+        playClick()
         onType(newCount, false)
       } else {
+        playError()
         onType(typedCount, true)
       }
       e.preventDefault()
