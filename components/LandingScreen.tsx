@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
 import { generateRoomCode } from '@/lib/game'
+import { CHARACTERS } from '@/data/characters'
 
 interface Props {
   user: { username: string; total_wins: number; best_wpm: number } | null
@@ -84,7 +86,7 @@ export default function LandingScreen({ user }: Props) {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center w-full max-w-sm sm:max-w-lg"
+          className="text-center w-full max-w-sm sm:max-w-xl"
         >
           {/* Title */}
           <motion.h1
@@ -96,9 +98,50 @@ export default function LandingScreen({ user }: Props) {
             TypeWar
           </motion.h1>
           <p className="text-white/40 text-sm sm:text-base mb-1 sm:mb-2">Multiplayer battle royale typing game</p>
-          <p className="text-white/20 text-xs sm:text-sm mb-8 sm:mb-12">Type or die — last founder standing wins the 🦄</p>
+          <p className="text-white/20 text-xs sm:text-sm mb-6">Type or die — last founder standing wins the 🦄</p>
 
-          {/* User stats on mobile (below title) */}
+          {/* Character showcase */}
+          <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-6 sm:mb-10 w-full">
+            {CHARACTERS.map((char, i) => (
+              <motion.div
+                key={char.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 + i * 0.08, duration: 0.4 }}
+                whileHover={{ scale: 1.05, y: -4 }}
+                className="relative rounded-xl overflow-hidden border cursor-default"
+                style={{ borderColor: `${char.color}40` }}
+              >
+                {/* Portrait */}
+                <div className="relative w-full aspect-[3/4] bg-[#0d0d0d]">
+                  <Image
+                    src={char.image}
+                    alt={char.name}
+                    fill
+                    className="object-cover object-top"
+                    sizes="(max-width: 640px) 25vw, 130px"
+                  />
+                  {/* Bottom gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/30 to-transparent" />
+                  {/* Color glow at bottom */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-1"
+                    style={{ backgroundColor: char.color, boxShadow: `0 0 12px ${char.color}` }}
+                  />
+                  {/* Emoji badge */}
+                  <div className="absolute top-1.5 left-1.5 text-sm">{char.emoji}</div>
+                </div>
+                {/* Name */}
+                <div className="p-1.5 bg-[#0d0d0d]">
+                  <p className="text-[9px] sm:text-[10px] font-bold text-white/70 leading-tight truncate">
+                    {char.nameEn}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* User stats on mobile (below characters) */}
           {user && (
             <div className="sm:hidden flex items-center justify-center gap-3 text-xs mb-6 text-white/40">
               <span>{user.best_wpm} WPM</span>
