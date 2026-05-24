@@ -5,6 +5,7 @@ export interface Character {
   bio: string
   color: string
   emoji: string
+  image: string
 }
 
 export const CHARACTERS: Character[] = [
@@ -15,6 +16,7 @@ export const CHARACTERS: Character[] = [
     bio: 'The OG. Types code at 120 WPM while delivering a motivational speech about building products in 48 hours.',
     color: '#ff4444',
     emoji: '🔥',
+    image: '/characters/arman-game.png',
   },
   {
     id: 'erzat',
@@ -23,6 +25,7 @@ export const CHARACTERS: Character[] = [
     bio: 'The Hyper-Growth machine. Unmatched speed when typing technical text. Seed rounds closed before lunch.',
     color: '#00ff88',
     emoji: '⚡',
+    image: '/characters/erzat-game.png',
   },
   {
     id: 'arlan',
@@ -31,22 +34,16 @@ export const CHARACTERS: Character[] = [
     bio: 'The AI Alchemist. Generates code prompts instantly. Watch out for typos — models hallucinate.',
     color: '#00aaff',
     emoji: '🤖',
+    image: '/characters/arlan-game.png',
   },
   {
-    id: 'dosjan',
-    name: 'Досжан Жусупов',
-    nameEn: 'Dosjan Zhussupov',
-    bio: 'The DeepTech Pioneer. High precision, zero tolerance for typos. PhD-level keystroke accuracy.',
-    color: '#aa00ff',
-    emoji: '🔬',
-  },
-  {
-    id: 'askhat',
-    name: 'Асхат Омаров',
-    nameEn: 'Askhat Omarov',
-    bio: 'The Ecosystem Builder. Extreme endurance. Has been moving towards an IPO since 2019.',
+    id: 'tigr',
+    name: 'Тигр',
+    nameEn: 'Tigr',
+    bio: 'The Wildcard. Unpredictable typing speed. Known to go from zero to Series B in a single keystroke.',
     color: '#ffaa00',
-    emoji: '🏗️',
+    emoji: '🐯',
+    image: '/characters/tigr-game.png',
   },
 ]
 

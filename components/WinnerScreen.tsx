@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { getCharacter } from '@/data/characters'
@@ -52,7 +52,14 @@ export default function WinnerScreen({ winner, players, roomId, userId }: Props)
           <p className="text-[#ffaa00] text-xs uppercase tracking-[0.3em] mb-4 font-semibold">
             🦄 UNICORN FOUNDER DETECTED 🦄
           </p>
-          <div className="text-8xl mb-6">{winnerChar?.emoji ?? '🏆'}</div>
+          <div className="relative w-48 h-64 mx-auto mb-6 rounded-2xl overflow-hidden border-2 border-[#ffaa00] shadow-[0_0_40px_rgba(255,170,0,0.3)]">
+            {winnerChar ? (
+              <Image src={winnerChar.image} alt={winnerChar.name} fill className="object-cover object-top" sizes="192px" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-7xl">🏆</div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          </div>
           <h1 className="text-4xl font-black text-white tracking-tight mb-2">
             {winnerChar?.name ?? winner.name}
           </h1>
@@ -91,7 +98,13 @@ export default function WinnerScreen({ winner, players, roomId, userId }: Props)
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-[#555] text-sm w-4">#{i + 1}</span>
-                    <span className="text-lg">{char?.emoji ?? '👤'}</span>
+                    <div className="relative w-8 h-8 rounded-full overflow-hidden border border-[#333] flex-shrink-0">
+                      {char ? (
+                        <Image src={char.image} alt={char.name} fill className="object-cover object-top" sizes="32px" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-sm bg-[#222]">👤</div>
+                      )}
+                    </div>
                     <div>
                       <p className="text-sm font-semibold text-white">@{p.name}</p>
                       <p className="text-xs text-[#555]">{char?.name ?? 'Unknown'}</p>

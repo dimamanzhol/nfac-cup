@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { RealtimeChannel } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase'
@@ -107,7 +108,7 @@ export default function Lobby({ room, players, userId, channel, onGameStart, set
         {/* Character selection */}
         <div className="mb-8">
           <p className="text-[#555] text-xs uppercase tracking-widest mb-3">Choose Your Founder</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {CHARACTERS.map((char) => {
               const selectedBy = players.find((p) => p.character_id === char.id)
               const isMe = me?.character_id === char.id
@@ -116,29 +117,52 @@ export default function Lobby({ room, players, userId, channel, onGameStart, set
               return (
                 <motion.button
                   key={char.id}
-                  whileHover={{ scale: takenByOther ? 1 : 1.02 }}
-                  whileTap={{ scale: takenByOther ? 1 : 0.98 }}
+                  whileHover={{ scale: takenByOther ? 1 : 1.04 }}
+                  whileTap={{ scale: takenByOther ? 1 : 0.96 }}
                   onClick={() => !takenByOther && selectCharacter(char.id)}
-                  className={`text-left p-4 rounded-lg border transition-all ${
+                  className={`relative flex flex-col items-center rounded-xl border overflow-hidden transition-all ${
                     isMe
-                      ? 'border-white bg-white/10'
+                      ? 'border-white shadow-[0_0_20px_rgba(255,255,255,0.15)]'
                       : takenByOther
-                      ? 'border-[#222] opacity-40 cursor-not-allowed'
+                      ? 'border-[#1a1a1a] opacity-40 cursor-not-allowed'
                       : 'border-[#222] hover:border-[#444] cursor-pointer'
                   }`}
+                  style={isMe ? { borderColor: char.color, boxShadow: `0 0 20px ${char.color}30` } : {}}
                 >
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl">{char.emoji}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-white text-sm">{char.name}</p>
-                      <p className="text-[#555] text-xs mt-1 leading-relaxed">{char.bio}</p>
-                      {takenByOther && selectedBy && (
-                        <p className="text-[#ff4444] text-xs mt-1">Selected by @{selectedBy.name}</p>
-                      )}
-                      {isMe && (
-                        <p className="text-[#00ff88] text-xs mt-1 font-semibold">✓ Your founder</p>
-                      )}
-                    </div>
+                  {/* Character image */}
+                  <div className="relative w-full aspect-[3/4] bg-[#0d0d0d]">
+                    <Image
+                      src={char.image}
+                      alt={char.name}
+                      fill
+                      className="object-cover object-top"
+                      sizes="(max-width: 640px) 50vw, 25vw"
+                    />
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+
+                    {isMe && (
+                      <div
+                        className="absolute top-2 right-2 text-xs font-bold px-2 py-0.5 rounded-full"
+                        style={{ backgroundColor: char.color, color: '#000' }}
+                      >
+                        ✓ YOU
+                      </div>
+                    )}
+                    {takenByOther && selectedBy && (
+                      <div className="absolute top-2 right-2 text-xs font-bold px-2 py-0.5 rounded-full bg-[#ff4444] text-white">
+                        TAKEN
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div className="p-3 w-full">
+                    <p className="font-bold text-white text-xs leading-tight">{char.name}</p>
+                    <p className="text-[#555] text-[10px] mt-1 leading-relaxed line-clamp-2">{char.bio}</p>
+                    {takenByOther && selectedBy && (
+                      <p className="text-[#ff4444] text-[10px] mt-1">@{selectedBy.name}</p>
+                    )}
                   </div>
                 </motion.button>
               )
@@ -158,9 +182,16 @@ export default function Lobby({ room, players, userId, channel, onGameStart, set
                     <span className="text-white text-sm font-semibold">@{p.name}</span>
                     {p.is_host && <span className="text-[#ffaa00] text-xs">HOST</span>}
                   </div>
-                  <span className="text-sm">
-                    {char ? `${char.emoji} ${char.name}` : <span className="text-[#444] text-xs">selecting...</span>}
-                  </span>
+                  {char ? (
+                    <div className="flex items-center gap-2">
+                      <div className="relative w-7 h-7 rounded-full overflow-hidden border border-[#333]">
+                        <Image src={char.image} alt={char.name} fill className="object-cover object-top" sizes="28px" />
+                      </div>
+                      <span className="text-xs text-[#aaa]">{char.name}</span>
+                    </div>
+                  ) : (
+                    <span className="text-[#444] text-xs">selecting...</span>
+                  )}
                 </div>
               )
             })}
